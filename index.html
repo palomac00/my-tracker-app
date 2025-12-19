@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <title>My Free TV & Movie Tracker</title>
+<button onclick="loginWithTrakt()">Sign in with Trakt</button>
+<p id="status"></p>
+
 <style>
 body {
   font-family: Arial, sans-serif;
@@ -44,6 +47,19 @@ button {
 <div id="results"></div>
 
 <script>
+const TRAKT_CLIENT_ID = "ca3904ae972de4cad0c6a3b029fa0e02ad7cd3581d1ebebdfcebaa8cc11d22c7";
+const REDIRECT_URI = "https://palomac00.github.io/my-tracker-app/";
+
+function loginWithTrakt() {
+  const url =
+    `https://api.trakt.tv/oauth/authorize` +
+    `?response_type=code` +
+    `&client_id=${TRAKT_CLIENT_ID}` +
+    `&redirect_uri=${encodeURIComponent(REDIRECT_URI)}`;
+
+  window.location.href = url;
+}
+
 const API_KEY = "fb06f7b1871ea929f9c0e515e3ecfe13";
 
 function search() {
