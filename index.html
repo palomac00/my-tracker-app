@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>My Free TV & Movie Tracker</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #0f172a;
+  color: white;
+  padding: 20px;
+}
+input {
+  padding: 10px;
+  width: 300px;
+}
+button {
+  padding: 10px;
+  margin-left: 5px;
+  cursor: pointer;
+}
+.card {
+  background: #1e293b;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+}
+.card img {
+  width: 80px;
+  margin-right: 10px;
+  border-radius: 5px;
+}
+</style>
+</head>
+<body>
+
+<h1>🎬 My Free Tracker</h1>
+
+<input id="searchInput" placeholder="Search movies or TV shows">
+<button onclick="search()">Search</button>
+
+<div id="results"></div>
+
+<script>
+const API_KEY = "fb06f7b1871ea929f9c0e515e3ecfe13";
+
+function search() {
+  const query = document.getElementById("searchInput").value;
+  fetch(`https://api.themoviedb.org/3/search/multi?api_key=${API_KEY}&query=${query}`)
+    .then(res => res.json())
+    .then(data => showResults(data.results));
+}
+
+function showResults(items) {
+  const results = document.getElementById("results");
+  results.innerHTML = "";
+
+  items.forEach(item => {
+    if (!item.poster_path) return;
+
+    const card = document.createElement("div");
+    card.className = "card";
+
+    card.innerHTML = `
+      <img src="https://image.tmdb.org/t/p/w200${item.poster_path}">
+      <div>
+        <h3>${item.title || item.name}</h3>
+        <button onclick="markWatched('${item.id}', '${item.title || item.name}')">
+          Mark Watched
+        </button>
+      </div>
+    `;
+    results.appendChild(card);
+  });
+}
+
+function markWatched(id, title) {
+  let watched = JSON.parse(localStorage.getItem("watched")) || [];
+  watched.push({ id, title });
+  localStorage.setItem("watched", JSON.stringify(watched));
+  alert(`${title} added to watched list`);
+}
+</script>
+
+</body>
+</html>
