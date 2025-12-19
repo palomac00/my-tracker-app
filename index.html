@@ -1,163 +1,141 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>My Free TV & Movie Tracker</title>
-<button onclick="startTraktDeviceAuth()">Connect Trakt</button>
-<p id="traktStatus"></p>
+  <meta charset="UTF-8">
+  <title>My Free TV & Movie Tracker</title>
 
-<style>
-body {
-  font-family: Arial, sans-serif;
-  background: #0f172a;
-  color: white;
-  padding: 20px;
-}
-input {
-  padding: 10px;
-  width: 300px;
-}
-button {
-  padding: 10px;
-  margin-left: 5px;
-  cursor: pointer;
-}
-.card {
-  background: #1e293b;
-  padding: 10px;
-  margin: 10px 0;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-}
-.card img {
-  width: 80px;
-  margin-right: 10px;
-  border-radius: 5px;
-}
-</style>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: white;
+      padding: 20px;
+    }
+    input {
+      padding: 10px;
+      width: 300px;
+    }
+    button {
+      padding: 10px;
+      margin: 5px 0;
+      cursor: pointer;
+    }
+    .card {
+      background: #1e293b;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+    }
+    .card img {
+      width: 80px;
+      margin-right: 10px;
+      border-radius: 5px;
+    }
+  </style>
 </head>
+
 <body>
 
-<h1>🎬 My Free Tracker</h1>
+  <button onclick="startTraktDeviceAuth()">Connect Trakt</button>
+  <p id="traktStatus"></p>
 
-<input id="searchInput" placeholder="Search movies or TV shows">
-<button onclick="search()">Search</button>
+  <h1>🎬 My Free Tracker</h1>
 
-<div id="results"></div>
+  <input id="searchInput" placeholder="Search movies or TV shows">
+  <button onclick="search()">Search</button>
 
-<script>
-const TRAKT_CLIENT_ID = "ca3904ae972de4cad0c6a3b029fa0e02ad7cd3581d1ebebdfcebaa8cc11d22c7";
+  <div id="results"></div>
 
-let deviceCode = null;
-let pollInterval = null;
+  <script>
+    const TRAKT_CLIENT_ID =
+      "ca3904ae972de4cad0c6a3b029fa0e02ad7cd3581d1ebebdfcebaa8cc11d22c7";
 
-function startTraktDeviceAuth() {
-  fetch("https://api.trakt.tv/oauth/device/code", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "trakt-api-version": "2",
-      "trakt-api-key": TRAKT_CLIENT_ID
-    },
-    body: JSON.stringify({
-      client_id: TRAKT_CLIENT_ID
-    })
-  })
-  .then(res => res.json())
-  .then(data => {
-    deviceCode = data.device_code;
+    const API_KEY = "fb06f7b1871ea929f9c0e515e3ecfe13";
 
-    document.getElementById("traktStatus").innerHTML = `
-      <p>Go to:</p>
-      <p><strong>${data.verification_url}</strong></p>
-      <p>Enter this code:</p>
-      <h2>${data.user_code}</h2>
-    `;
+    let deviceCode = null;
+    let pollInterval = null;
 
-    pollInterval = setInterval(checkTraktAuth, data.interval * 1000);
-  });
-}
+    function startTraktDeviceAuth() {
+      fetch("https://api.trakt.tv/oauth/device/code", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "trakt-api-version": "2",
+          "trakt-api-key": TRAKT_CLIENT_ID
+        },
+        body: JSON.stringify({ client_id: TRAKT_CLIENT_ID })
+      })
+      .then(res => res.json())
+      .then(data => {
+        deviceCode = data.device_code;
 
-function checkTraktAuth() {
-  fetch("https://api.trakt.tv/oauth/device/token", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      code: deviceCode,
-      client_id: TRAKT_CLIENT_ID
-    })
-  })
-  .then(res => {
-    if (res.status === 200) return res.json();
-    return null;
-  })
-  .then(data => {
-    if (!data) return;
+        document.getElementById("traktStatus").innerHTML = `
+          <p>Go to:</p>
+          <p><strong>${data.verification_url}</strong></p>
+          <p>Enter this code:</p>
+          <h2>${data.user_code}</h2>
+        `;
 
-    clearInterval(pollInterval);
-    localStorage.setItem("trakt_token", data.access_token);
+        pollInterval = setInterval(checkTraktAuth, data.interval * 1000);
+      });
+    }
 
-    document.getElementById("traktStatus").innerText =
-      "✅ Connected to Trakt!";
-  });
-}
-</script>
+    function checkTraktAuth() {
+      fetch("https://royal-glitter-3529.whatpalomalikes.workers.dev", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: deviceCode })
+      })
+      .then(res => res.status === 200 ? res.json() : null)
+      .then(data => {
+        if (!data || !data.access_token) return;
 
-const TRAKT_CLIENT_ID = "ca3904ae972de4cad0c6a3b029fa0e02ad7cd3581d1ebebdfcebaa8cc11d22c7";
-const REDIRECT_URI = "https://palomac00.github.io/my-tracker-app/";
+        clearInterval(pollInterval);
+        localStorage.setItem("trakt_token", data.access_token);
+        document.getElementById("traktStatus").innerText =
+          "✅ Connected to Trakt!";
+      });
+    }
 
-function loginWithTrakt() {
-  const url =
-    `https://api.trakt.tv/oauth/authorize` +
-    `?response_type=code` +
-    `&client_id=${TRAKT_CLIENT_ID}` +
-    `&redirect_uri=${encodeURIComponent(REDIRECT_URI)}`;
+    function search() {
+      const query = document.getElementById("searchInput").value;
+      fetch(`https://api.themoviedb.org/3/search/multi?api_key=${API_KEY}&query=${query}`)
+        .then(res => res.json())
+        .then(data => showResults(data.results));
+    }
 
-  window.location.href = url;
-}
+    function showResults(items) {
+      const results = document.getElementById("results");
+      results.innerHTML = "";
 
-const API_KEY = "fb06f7b1871ea929f9c0e515e3ecfe13";
+      items.forEach(item => {
+        if (!item.poster_path) return;
 
-function search() {
-  const query = document.getElementById("searchInput").value;
-  fetch(`https://api.themoviedb.org/3/search/multi?api_key=${API_KEY}&query=${query}`)
-    .then(res => res.json())
-    .then(data => showResults(data.results));
-}
+        const card = document.createElement("div");
+        card.className = "card";
 
-function showResults(items) {
-  const results = document.getElementById("results");
-  results.innerHTML = "";
+        card.innerHTML = `
+          <img src="https://image.tmdb.org/t/p/w200${item.poster_path}">
+          <div>
+            <h3>${item.title || item.name}</h3>
+            <button onclick="markWatched('${item.id}', '${item.title || item.name}')">
+              Mark Watched
+            </button>
+          </div>
+        `;
+        results.appendChild(card);
+      });
+    }
 
-  items.forEach(item => {
-    if (!item.poster_path) return;
-
-    const card = document.createElement("div");
-    card.className = "card";
-
-    card.innerHTML = `
-      <img src="https://image.tmdb.org/t/p/w200${item.poster_path}">
-      <div>
-        <h3>${item.title || item.name}</h3>
-        <button onclick="markWatched('${item.id}', '${item.title || item.name}')">
-          Mark Watched
-        </button>
-      </div>
-    `;
-    results.appendChild(card);
-  });
-}
-
-function markWatched(id, title) {
-  let watched = JSON.parse(localStorage.getItem("watched")) || [];
-  watched.push({ id, title });
-  localStorage.setItem("watched", JSON.stringify(watched));
-  alert(`${title} added to watched list`);
-}
-</script>
+    function markWatched(id, title) {
+      let watched = JSON.parse(localStorage.getItem("watched")) || [];
+      watched.push({ id, title });
+      localStorage.setItem("watched", JSON.stringify(watched));
+      alert(`${title} added to watched list`);
+    }
+  </script>
 
 </body>
 </html>
