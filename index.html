@@ -38,17 +38,7 @@
 
 <body>
 
-  <button onclick="connectTrakt()">Connect Trakt</button
-function connectTrakt() {
-  const token = localStorage.getItem("trakt_token");
-  if (token) {
-    document.getElementById("traktStatus").innerText =
-      "✅ Already connected to Trakt!";
-    return;
-  }
-  startTraktDeviceAuth();
-}
-
+  <button onclick="connectTrakt()">Connect Trakt</button>
   <p id="traktStatus"></p>
 
   <h1>🎬 My Free Tracker</h1>
@@ -66,17 +56,25 @@ function connectTrakt() {
 
     let deviceCode = null;
     let pollInterval = null;
-<script>
-const TRAKT_CLIENT_ID = "ca3904ae972de4cad0c6a3b029fa0e02ad7cd3581d1ebebdfcebaa8cc11d22c7";
 
-const existingToken = localStorage.getItem("trakt_token");
+    // ✅ Check existing token on load
+    document.addEventListener("DOMContentLoaded", () => {
+      const existingToken = localStorage.getItem("trakt_token");
+      if (existingToken) {
+        document.getElementById("traktStatus").innerText =
+          "✅ Connected to Trakt!";
+      }
+    });
 
-if (existingToken) {
-  document.addEventListener("DOMContentLoaded", () => {
-    document.getElementById("traktStatus").innerText =
-      "✅ Connected to Trakt!";
-  });
-}
+    function connectTrakt() {
+      const token = localStorage.getItem("trakt_token");
+      if (token) {
+        document.getElementById("traktStatus").innerText =
+          "✅ Already connected to Trakt!";
+        return;
+      }
+      startTraktDeviceAuth();
+    }
 
     function startTraktDeviceAuth() {
       fetch("https://api.trakt.tv/oauth/device/code", {
@@ -160,5 +158,3 @@ if (existingToken) {
 
 </body>
 </html>
-
-
