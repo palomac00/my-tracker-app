@@ -56,6 +56,17 @@
 
     let deviceCode = null;
     let pollInterval = null;
+<script>
+const TRAKT_CLIENT_ID = "ca3904ae972de4cad0c6a3b029fa0e02ad7cd3581d1ebebdfcebaa8cc11d22c7";
+
+const existingToken = localStorage.getItem("trakt_token");
+
+if (existingToken) {
+  document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById("traktStatus").innerText =
+      "✅ Connected to Trakt!";
+  });
+}
 
     function startTraktDeviceAuth() {
       fetch("https://api.trakt.tv/oauth/device/code", {
@@ -139,3 +150,4 @@
 
 </body>
 </html>
+
