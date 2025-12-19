@@ -38,7 +38,17 @@
 
 <body>
 
-  <button onclick="startTraktDeviceAuth()">Connect Trakt</button>
+  <button onclick="connectTrakt()">Connect Trakt</button
+function connectTrakt() {
+  const token = localStorage.getItem("trakt_token");
+  if (token) {
+    document.getElementById("traktStatus").innerText =
+      "✅ Already connected to Trakt!";
+    return;
+  }
+  startTraktDeviceAuth();
+}
+
   <p id="traktStatus"></p>
 
   <h1>🎬 My Free Tracker</h1>
@@ -150,4 +160,5 @@ if (existingToken) {
 
 </body>
 </html>
+
 
